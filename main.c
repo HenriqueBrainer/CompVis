@@ -14,6 +14,8 @@ enum constants
 {
   WINDOW_WIDTH = 1024,
   WINDOW_HEIGHT = 768,
+  SECONDARY_WINDOW_WIDTH = 400,
+  SECONDARY_WINDOW_HEIGHT = 620,
 };
 
 //------------------------------------------------------------------------------
@@ -211,6 +213,11 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
+  const SDL_DisplayID primaryDisplay = SDL_GetPrimaryDisplay();
+  SDL_SetWindowPosition(window,
+    SDL_WINDOWPOS_CENTERED_DISPLAY(primaryDisplay),
+    SDL_WINDOWPOS_CENTERED_DISPLAY(primaryDisplay));
+
   SDL_Texture *imageTexture = SDL_CreateTextureFromSurface(renderer, grayscaleSurface);
   if (imageTexture == NULL)
   {
@@ -224,6 +231,36 @@ int main(int argc, char *argv[])
   // grayscaleSurface nao e liberada aqui: alem da textura, ela ainda vai
   // ser usada mais adiante no programa.
 
+  SDL_Window *secondaryWindow = SDL_CreateWindow("CompVis - Histograma",
+    SECONDARY_WINDOW_WIDTH, SECONDARY_WINDOW_HEIGHT, 0);
+  if (secondaryWindow == NULL)
+  {
+    fprintf(stderr, "Erro ao criar a janela secundaria: %s\n", SDL_GetError());
+    SDL_DestroyTexture(imageTexture);
+    SDL_DestroySurface(grayscaleSurface);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    return EXIT_FAILURE;
+  }
+  SDL_SetWindowPosition(secondaryWindow, 0, 0);
+  if (!SDL_SetWindowParent(secondaryWindow, window))
+  {
+    fprintf(stderr, "Aviso: nao foi possivel associar a janela secundaria "
+      "como filha da janela principal: %s\n", SDL_GetError());
+  }
+
+  SDL_Renderer *secondaryRenderer = SDL_CreateRenderer(secondaryWindow, NULL);
+  if (secondaryRenderer == NULL)
+  {
+    fprintf(stderr, "Erro ao criar o renderizador da janela secundaria: %s\n", SDL_GetError());
+    SDL_DestroyWindow(secondaryWindow);
+    SDL_DestroyTexture(imageTexture);
+    SDL_DestroySurface(grayscaleSurface);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    return EXIT_FAILURE;
+  }
+
   SDL_FRect imageRect = { .x = 0.0f, .y = 0.0f };
   SDL_GetTextureSize(imageTexture, &imageRect.w, &imageRect.h);
 
@@ -233,9 +270,17 @@ int main(int argc, char *argv[])
   {
     while (SDL_PollEvent(&event))
     {
-      if (event.type == SDL_EVENT_QUIT)
+      switch (event.type)
       {
-        isRunning = false;
+        case SDL_EVENT_QUIT:
+          isRunning = false;
+          break;
+
+        case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+          // As duas janelas trabalham juntas (imagem + histograma/controles),
+          // entao fechar qualquer uma delas encerra o programa.
+          isRunning = false;
+          break;
       }
     }
 
@@ -243,6 +288,10 @@ int main(int argc, char *argv[])
     SDL_RenderClear(renderer);
     SDL_RenderTexture(renderer, imageTexture, NULL, &imageRect);
     SDL_RenderPresent(renderer);
+
+    SDL_SetRenderDrawColor(secondaryRenderer, 24, 24, 28, 255);
+    SDL_RenderClear(secondaryRenderer);
+    SDL_RenderPresent(secondaryRenderer);
   }
 
   SDL_DestroyTexture(imageTexture);
@@ -250,6 +299,11 @@ int main(int argc, char *argv[])
 
   SDL_DestroySurface(grayscaleSurface);
   grayscaleSurface = NULL;
+
+  SDL_DestroyRenderer(secondaryRenderer);
+  SDL_DestroyWindow(secondaryWindow);
+  secondaryRenderer = NULL;
+  secondaryWindow = NULL;
 
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
