@@ -15,7 +15,7 @@
                 "-lSDL3",
                 "-Ic:/Users/henrique.brainer/Downloads/SDL/SDL3_image/include",
                 "-Lc:/Users/henrique.brainer/Downloads/SDL/SDL3_image/lib",
-                "-lSDL3",
+                "-lSDL3_image"
                 
             ],
             "options": {

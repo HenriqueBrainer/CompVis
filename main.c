@@ -62,7 +62,7 @@ static SDL_Surface *load_image(const char *path)
       "Erro: nao foi possivel carregar a imagem '%s'. "
       "O arquivo pode estar corrompido ou em um formato de imagem "
       "nao suportado pelo SDL_image. (%s)\n",
-      path, IMG_GetError());
+      path, SDL_GetError());
     return NULL;
   }
 
