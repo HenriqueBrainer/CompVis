@@ -24,7 +24,65 @@ typedef struct HistogramAnalysis
 } HistogramAnalysis;
 
 void render_histogram(SDL_Renderer *renderer, const HistogramAnalysis *analysis);
+bool analyze_histogram(SDL_Surface *grayscaleSurface, HistogramAnalysis *analysis);
+SDL_Surface *equalize_histogram(SDL_Surface *grayscaleSurface);
 
+//------------------------------------------------------------------------------
+// Botao desenhado com primitivas da SDL, com 3 estados visuais.
+//------------------------------------------------------------------------------
+typedef enum ButtonState
+{
+  BUTTON_STATE_NEUTRAL,
+  BUTTON_STATE_HOVER,
+  BUTTON_STATE_PRESSED,
+} ButtonState;
+
+typedef struct Button
+{
+  SDL_FRect rect;
+  const char *label;
+  ButtonState state;
+} Button;
+
+static bool point_in_rect(float x, float y, SDL_FRect rect)
+{
+  return x >= rect.x && x <= (rect.x + rect.w) &&
+    y >= rect.y && y <= (rect.y + rect.h);
+}
+
+static void draw_button(SDL_Renderer *renderer, const Button *button)
+{
+  Uint8 r, g, b;
+  switch (button->state)
+  {
+    case BUTTON_STATE_PRESSED:
+      r = 20; g = 60; b = 140; // azul escuro
+      break;
+    case BUTTON_STATE_HOVER:
+      r = 110; g = 170; b = 255; // azul claro
+      break;
+    case BUTTON_STATE_NEUTRAL:
+    default:
+      r = 50; g = 110; b = 220; // azul
+      break;
+  }
+
+  SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+  SDL_RenderFillRect(renderer, &button->rect);
+  SDL_SetRenderDrawColor(renderer, 235, 238, 245, 255);
+  SDL_RenderRect(renderer, &button->rect);
+
+  // SDL_RenderDebugText usa uma fonte de largura fixa (8x8 px por
+  // caractere, na escala padrao), o que da pra centralizar o texto sem
+  // precisar medir a string com uma fonte de verdade.
+  const float textWidth = (float)SDL_strlen(button->label) * 8.0f;
+  const float textX = button->rect.x + ((button->rect.w - textWidth) / 2.0f);
+  const float textY = button->rect.y + ((button->rect.h - 8.0f) / 2.0f);
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  SDL_RenderDebugText(renderer, textX, textY, button->label);
+}
+
+//------------------------------------------------------------------------------
 int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
 {
   SDL_Window *window = NULL;
@@ -88,6 +146,27 @@ int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
   SDL_FRect imageRect = { .x = 0.0f, .y = 0.0f };
   SDL_GetTextureSize(imageTexture, &imageRect.w, &imageRect.h);
 
+  // Estado da equalizacao: a surface e a analise originais (recebidas pelo
+  // gui_run) ficam guardadas; a versao equalizada e calculada sob demanda,
+  // no primeiro clique, e reaproveitada nos cliques seguintes.
+  SDL_Surface *originalSurface = grayscaleSurface;
+  HistogramAnalysis originalAnalysis = *histogram;
+
+  SDL_Surface *equalizedSurface = NULL;
+  HistogramAnalysis equalizedAnalysis = { 0 };
+  bool isShowingEqualized = false;
+
+  HistogramAnalysis activeAnalysis = originalAnalysis;
+
+  Button equalizeButton =
+  {
+    .rect = { .x = 80.0f, .y = 480.0f, .w = 240.0f, .h = 44.0f },
+    .label = "Equalizar",
+    .state = BUTTON_STATE_NEUTRAL,
+  };
+
+  const SDL_WindowID secondaryWindowID = SDL_GetWindowID(secondaryWindow);
+
   SDL_Event event;
   bool isRunning = true;
   while (isRunning)
@@ -105,24 +184,105 @@ int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
           // entao fechar qualquer uma delas encerra o programa.
           isRunning = false;
           break;
+
+        case SDL_EVENT_MOUSE_MOTION:
+          if (event.motion.windowID == secondaryWindowID &&
+            equalizeButton.state != BUTTON_STATE_PRESSED)
+          {
+            equalizeButton.state = point_in_rect(event.motion.x, event.motion.y, equalizeButton.rect)
+              ? BUTTON_STATE_HOVER : BUTTON_STATE_NEUTRAL;
+          }
+          break;
+
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+          if (event.button.button == SDL_BUTTON_LEFT &&
+            event.button.windowID == secondaryWindowID &&
+            point_in_rect(event.button.x, event.button.y, equalizeButton.rect))
+          {
+            equalizeButton.state = BUTTON_STATE_PRESSED;
+          }
+          break;
+
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+          if (event.button.button == SDL_BUTTON_LEFT &&
+            equalizeButton.state == BUTTON_STATE_PRESSED)
+          {
+            const bool releasedInsideButton =
+              event.button.windowID == secondaryWindowID &&
+              point_in_rect(event.button.x, event.button.y, equalizeButton.rect);
+
+            if (releasedInsideButton)
+            {
+              isShowingEqualized = !isShowingEqualized;
+
+              if (isShowingEqualized && equalizedSurface == NULL)
+              {
+                equalizedSurface = equalize_histogram(originalSurface);
+                if (equalizedSurface == NULL)
+                {
+                  fprintf(stderr, "Erro: equalizacao falhou; mantendo a imagem original.\n");
+                  isShowingEqualized = false;
+                }
+                else if (!analyze_histogram(equalizedSurface, &equalizedAnalysis))
+                {
+                  fprintf(stderr, "Erro: nao foi possivel analisar o histograma equalizado.\n");
+                  SDL_DestroySurface(equalizedSurface);
+                  equalizedSurface = NULL;
+                  isShowingEqualized = false;
+                }
+              }
+
+              SDL_Surface *activeSurface = isShowingEqualized ? equalizedSurface : originalSurface;
+              activeAnalysis = isShowingEqualized ? equalizedAnalysis : originalAnalysis;
+              equalizeButton.label = isShowingEqualized ? "Ver original" : "Equalizar";
+
+              SDL_DestroyTexture(imageTexture);
+              imageTexture = SDL_CreateTextureFromSurface(renderer, activeSurface);
+              if (imageTexture == NULL)
+              {
+                fprintf(stderr, "Erro ao recriar a textura da imagem: %s\n", SDL_GetError());
+              }
+              else
+              {
+                SDL_GetTextureSize(imageTexture, &imageRect.w, &imageRect.h);
+              }
+            }
+
+            equalizeButton.state = releasedInsideButton
+              ? BUTTON_STATE_HOVER : BUTTON_STATE_NEUTRAL;
+          }
+          break;
       }
     }
 
     SDL_SetRenderDrawColor(renderer, 32, 32, 32, 255);
     SDL_RenderClear(renderer);
-    SDL_RenderTexture(renderer, imageTexture, NULL, &imageRect);
+    if (imageTexture != NULL)
+    {
+      SDL_RenderTexture(renderer, imageTexture, NULL, &imageRect);
+    }
     SDL_RenderPresent(renderer);
 
     SDL_SetRenderDrawColor(secondaryRenderer, 24, 24, 28, 255);
     SDL_RenderClear(secondaryRenderer);
-    render_histogram(secondaryRenderer, histogram);
+    render_histogram(secondaryRenderer, &activeAnalysis);
+    draw_button(secondaryRenderer, &equalizeButton);
     SDL_RenderPresent(secondaryRenderer);
   }
 
-  SDL_DestroyTexture(imageTexture);
-  imageTexture = NULL;
+  if (imageTexture != NULL)
+  {
+    SDL_DestroyTexture(imageTexture);
+    imageTexture = NULL;
+  }
 
-  SDL_DestroySurface(grayscaleSurface);
+  if (equalizedSurface != NULL)
+  {
+    SDL_DestroySurface(equalizedSurface);
+    equalizedSurface = NULL;
+  }
+
+  SDL_DestroySurface(originalSurface);
   grayscaleSurface = NULL;
 
   SDL_DestroyRenderer(secondaryRenderer);
@@ -136,5 +296,4 @@ int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
   window = NULL;
 
   return EXIT_SUCCESS;
-
 }
