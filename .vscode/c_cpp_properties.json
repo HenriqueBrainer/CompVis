@@ -4,7 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:\\Users\\henrique.brainer\\Downloads\\SDL3\\include"
+                "C:\\Users\\henrique.brainer\\Downloads\\SDL\\SDL3\\include",
+                "C:\\Users\\henrique.brainer\\Downloads\\SDL\\SDL3_image\\include"
             ],
             "defines": [
                 "_DEBUG",

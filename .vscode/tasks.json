@@ -10,9 +10,13 @@
                 "${file}",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
-                "-Ic:/Users/henrique.brainer/Downloads/SDL3/include",
-                "-Lc:/Users/henrique.brainer/Downloads/SDL3/lib",
-                "-lSDL3"
+                "-Ic:/Users/henrique.brainer/Downloads/SDL/SDL3/include",
+                "-Lc:/Users/henrique.brainer/Downloads/SDL/SDL3/lib",
+                "-lSDL3",
+                "-Ic:/Users/henrique.brainer/Downloads/SDL/SDL3_image/include",
+                "-Lc:/Users/henrique.brainer/Downloads/SDL/SDL3_image/lib",
+                "-lSDL3",
+                
             ],
             "options": {
                 "cwd": "C:/msys64/ucrt64/bin"
