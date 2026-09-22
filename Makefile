@@ -23,7 +23,7 @@ SDL3_IMAGE_DIR ?= C:/msys64/ucrt64
 
 CFLAGS  += -I$(SDL3_DIR)/include -I$(SDL3_IMAGE_DIR)/include
 LDFLAGS += -L$(SDL3_DIR)/lib -L$(SDL3_IMAGE_DIR)/lib
-LDLIBS  += -lSDL3 -lSDL3_image
+LDLIBS  += -lSDL3 -lSDL3_image -lm
 
 .PHONY: all run clean
 

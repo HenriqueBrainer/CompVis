@@ -15,7 +15,8 @@
                 "-lSDL3",
                 "-Ic:/Users/Pichau/Desktop/Projeto/libs/SDL3_image/include",
                 "-Lc:/Users/Pichau/Desktop/Projeto/libs/SDL3_image/lib",
-                "-lSDL3_image"
+                "-lSDL3_image",
+                "-lm"
                 
             ],
             "options": {

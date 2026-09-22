@@ -2,8 +2,8 @@
 Projeto 1 — Computação Visual (Mackenzie)
 
 ## Bibliotecas e versões
-- SDL3: 3.40
-- SDL3_image: 3.40
+- SDL3: 3.4.0
+- SDL3_image: 3.4.6
 
 ## Compilação
 
@@ -45,6 +45,28 @@ O programa exige o caminho da imagem como argumento de linha de comando:
 ```
 main.exe caminho_da_imagem.ext
 ```
+
+## Histograma e análise da imagem
+
+Depois de converter a imagem para escala de cinza, o programa calcula as 256
+frequências de intensidade (0 a 255) e exibe o histograma normalizado na janela
+secundária. A normalização usa a maior frequência como referência, para que o
+gráfico permaneça legível independentemente da resolução da imagem.
+
+A mesma janela mostra a média de intensidade e o desvio padrão populacional:
+
+- média menor que 85: imagem escura;
+- média de 85 a 170: imagem média;
+- média maior que 170: imagem clara;
+- desvio padrão menor que 42,5: contraste baixo;
+- desvio padrão de 42,5 até abaixo de 85: contraste médio;
+- desvio padrão a partir de 85: contraste alto.
+
+Os limites de luminosidade dividem a faixa de intensidade de 8 bits em três
+partes. Os limites de contraste dividem em três partes a faixa teórica do
+desvio padrão, que vai de 0 a 127,5. As informações textuais são desenhadas
+com a fonte de depuração 8x8 incorporada à SDL3, sem depender de fontes
+instaladas no sistema operacional.
 
 ## Sobre a pasta `1-Testes`
 Testando a funcionalidade 1:
