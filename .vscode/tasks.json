@@ -10,11 +10,11 @@
                 "${file}",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
-                "-Ic:/Users/henrique.brainer/Downloads/SDL/SDL3/include",
-                "-Lc:/Users/henrique.brainer/Downloads/SDL/SDL3/lib",
+                "-Ic:/Users/Pichau/Desktop/Projeto/libs/SDL3/include",
+                "-Lc:/Users/Pichau/Desktop/Projeto/libs/SDL3/lib",
                 "-lSDL3",
-                "-Ic:/Users/henrique.brainer/Downloads/SDL/SDL3_image/include",
-                "-Lc:/Users/henrique.brainer/Downloads/SDL/SDL3_image/lib",
+                "-Ic:/Users/Pichau/Desktop/Projeto/libs/SDL3_image/include",
+                "-Lc:/Users/Pichau/Desktop/Projeto/libs/SDL3_image/lib",
                 "-lSDL3_image"
                 
             ],

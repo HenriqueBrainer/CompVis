@@ -1,0 +1,6 @@
+# Executaveis / build
+*.exe
+*.o
+main
+Makefile.local
+
