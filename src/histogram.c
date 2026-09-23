@@ -24,6 +24,8 @@ static const double LIGHT_IMAGE_LIMIT = 170.0;
 static const double LOW_CONTRAST_LIMIT = 42.5;
 static const double HIGH_CONTRAST_LIMIT = 85.0;
 
+void render_text(SDL_Renderer *renderer, float x, float y, const char *text);
+
 //------------------------------------------------------------------------------
 // Calcula o histograma da surface em escala de cinza e, a partir dele, a
 // media e o desvio padrao populacional das intensidades. Como a surface de
@@ -121,8 +123,8 @@ bool analyze_histogram(SDL_Surface *grayscaleSurface,
 //------------------------------------------------------------------------------
 // Desenha o histograma normalizado pelo maior bin. Assim, imagens pequenas e
 // grandes usam toda a altura disponivel sem que as barras sejam cortadas.
-// SDL_RenderDebugText faz parte da propria SDL3 e evita depender de uma fonte
-// instalada no sistema para mostrar os resultados da analise.
+// Os textos (titulo, escala e informacoes) usam render_text() (text.c), que
+// carrega a fonte do projeto via SDL_ttf.
 //------------------------------------------------------------------------------
 void render_histogram(SDL_Renderer *renderer,
   const HistogramAnalysis *analysis)
@@ -133,7 +135,7 @@ void render_histogram(SDL_Renderer *renderer,
   const float graphHeight = 260.0f;
 
   SDL_SetRenderDrawColor(renderer, 224, 228, 236, 255);
-  SDL_RenderDebugText(renderer, 24.0f, 16.0f, "HISTOGRAMA (0-255)");
+  render_text(renderer, 24.0f, 16.0f, "Histograma (0-255)");
 
   SDL_FRect graphBackground = {
     graphLeft - 1.0f, graphTop - 1.0f, graphWidth + 2.0f, graphHeight + 2.0f
@@ -180,10 +182,10 @@ void render_histogram(SDL_Renderer *renderer,
   }
 
   SDL_SetRenderDrawColor(renderer, 190, 197, 211, 255);
-  SDL_RenderDebugText(renderer, graphLeft, graphTop + graphHeight + 8.0f, "0");
-  SDL_RenderDebugText(renderer, graphLeft + (graphWidth / 2.0f) - 12.0f,
+  render_text(renderer, graphLeft, graphTop + graphHeight + 8.0f, "0");
+  render_text(renderer, graphLeft + (graphWidth / 2.0f) - 12.0f,
     graphTop + graphHeight + 8.0f, "128");
-  SDL_RenderDebugText(renderer, graphLeft + graphWidth - 24.0f,
+  render_text(renderer, graphLeft + graphWidth - 24.0f,
     graphTop + graphHeight + 8.0f, "255");
 
   SDL_FRect informationPanel = { 20.0f, 338.0f, 360.0f, 124.0f };
@@ -193,16 +195,16 @@ void render_histogram(SDL_Renderer *renderer,
   SDL_RenderRect(renderer, &informationPanel);
 
   char text[96];
-  SDL_snprintf(text, sizeof(text), "MEDIA: %.2f - %s",
+  SDL_snprintf(text, sizeof(text), "Media: %.2f - %s",
     analysis->mean, analysis->brightnessClass);
   SDL_SetRenderDrawColor(renderer, 235, 238, 245, 255);
-  SDL_RenderDebugText(renderer, 36.0f, 360.0f, text);
+  render_text(renderer, 36.0f, 360.0f, text);
 
-  SDL_snprintf(text, sizeof(text), "DESVIO PADRAO: %.2f - %s",
+  SDL_snprintf(text, sizeof(text), "Desvio padrao: %.2f - %s",
     analysis->standardDeviation, analysis->contrastClass);
-  SDL_RenderDebugText(renderer, 36.0f, 388.0f, text);
+  render_text(renderer, 36.0f, 388.0f, text);
 
-  SDL_snprintf(text, sizeof(text), "PIXELS: %llu",
+  SDL_snprintf(text, sizeof(text), "Pixels: %llu",
     (unsigned long long)analysis->pixelCount);
-  SDL_RenderDebugText(renderer, 36.0f, 416.0f, text);
+  render_text(renderer, 36.0f, 416.0f, text);
 }

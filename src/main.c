@@ -36,6 +36,8 @@ SDL_Surface *convert_to_grayscale(SDL_Surface *rgbaSurface);
 bool analyze_histogram(SDL_Surface *grayscaleSurface, HistogramAnalysis *analysis);
 void render_histogram(SDL_Renderer *renderer, const HistogramAnalysis *analysis);
 int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram);
+bool text_init(void);
+void text_shutdown(void);
 
 void shutdown_app(void)
 {
@@ -60,6 +62,11 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Erro ao iniciar a SDL: %s\n", SDL_GetError());
     return EXIT_FAILURE;
   }
+
+  // Se a fonte nao carregar, o programa continua rodando (histograma e
+  // botoes ainda funcionam), so que sem desenhar texto -- text_init() ja
+  // imprime o motivo do erro em stderr.
+  text_init();
 
   SDL_Surface *imageSurface = load_image(imagePath);
   if (imageSurface == NULL)
@@ -113,5 +120,7 @@ int main(int argc, char *argv[])
     histogram.standardDeviation, histogram.contrastClass);
 
 
-  return gui_run(grayscaleSurface, &histogram);
+  const int exitCode = gui_run(grayscaleSurface, &histogram);
+  text_shutdown();
+  return exitCode;
 }

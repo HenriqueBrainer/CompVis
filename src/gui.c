@@ -215,7 +215,7 @@ int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
           // Item 7: tecla S salva a imagem atualmente exibida na janela
           // principal. Ignora key repeat para nao salvar varias vezes se a
           // tecla ficar pressionada.
-          if (event.key.key == SDLK_s && !event.key.repeat)
+          if (event.key.key == SDLK_S && !event.key.repeat)
           {
             save_current_image(renderer);
           }
