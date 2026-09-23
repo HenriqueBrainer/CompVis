@@ -1,3 +1,21 @@
+/*
+---Turma 7G - Disciplina: Computação Visual – Projeto 1---
+  Integrantes:
+  
+  Bruna Gonçalves Corte David
+  10425696
+
+  Henrique Brainer Costa
+  10420717
+
+  João Pedro Queiroz de Andrade
+  10425822
+
+  Júlia Andrade
+  10428513
+*/
+
+
 //
 // Uso:
 //   programa caminho_da_imagem.ext

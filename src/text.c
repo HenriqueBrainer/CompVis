@@ -1,3 +1,21 @@
+/*
+---Turma 7G - Disciplina: Computação Visual – Projeto 1---
+  Integrantes:
+  
+  Bruna Gonçalves Corte David
+  10425696
+
+  Henrique Brainer Costa
+  10420717
+
+  João Pedro Queiroz de Andrade
+  10425822
+
+  Júlia Andrade
+  10428513
+*/
+
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <SDL3/SDL.h>
