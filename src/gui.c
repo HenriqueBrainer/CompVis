@@ -29,6 +29,9 @@ SDL_Surface *equalize_histogram(SDL_Surface *grayscaleSurface);
 SDL_FRect image_display_rect(bool showOriginalResolution, int nativeWidth, int nativeHeight);
 void apply_main_window_size(SDL_Window *window, bool showOriginalResolution,
   int nativeWidth, int nativeHeight);
+void save_current_image(SDL_Renderer *renderer);
+void render_text(SDL_Renderer *renderer, float x, float y, const char *text);
+void text_measure(const char *text, float *outWidth, float *outHeight);
 
 //------------------------------------------------------------------------------
 // Botao desenhado com primitivas da SDL, com 3 estados visuais.
@@ -75,14 +78,15 @@ static void draw_button(SDL_Renderer *renderer, const Button *button)
   SDL_SetRenderDrawColor(renderer, 235, 238, 245, 255);
   SDL_RenderRect(renderer, &button->rect);
 
-  // SDL_RenderDebugText usa uma fonte de largura fixa (8x8 px por
-  // caractere, na escala padrao), o que da pra centralizar o texto sem
-  // precisar medir a string com uma fonte de verdade.
-  const float textWidth = (float)SDL_strlen(button->label) * 8.0f;
+  // Mede o texto de verdade (com a fonte do projeto) para centralizar,
+  // em vez de estimar largura por caractere.
+  float textWidth = 0.0f;
+  float textHeight = 0.0f;
+  text_measure(button->label, &textWidth, &textHeight);
   const float textX = button->rect.x + ((button->rect.w - textWidth) / 2.0f);
-  const float textY = button->rect.y + ((button->rect.h - 8.0f) / 2.0f);
+  const float textY = button->rect.y + ((button->rect.h - textHeight) / 2.0f);
   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  SDL_RenderDebugText(renderer, textX, textY, button->label);
+  render_text(renderer, textX, textY, button->label);
 }
 
 //------------------------------------------------------------------------------
@@ -205,6 +209,16 @@ int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
           // As duas janelas trabalham juntas (imagem + histograma/controles),
           // entao fechar qualquer uma delas encerra o programa.
           isRunning = false;
+          break;
+
+        case SDL_EVENT_KEY_DOWN:
+          // Item 7: tecla S salva a imagem atualmente exibida na janela
+          // principal. Ignora key repeat para nao salvar varias vezes se a
+          // tecla ficar pressionada.
+          if (event.key.key == SDLK_s && !event.key.repeat)
+          {
+            save_current_image(renderer);
+          }
           break;
 
         case SDL_EVENT_MOUSE_MOTION:
