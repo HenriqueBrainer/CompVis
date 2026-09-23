@@ -26,6 +26,9 @@ typedef struct HistogramAnalysis
 void render_histogram(SDL_Renderer *renderer, const HistogramAnalysis *analysis);
 bool analyze_histogram(SDL_Surface *grayscaleSurface, HistogramAnalysis *analysis);
 SDL_Surface *equalize_histogram(SDL_Surface *grayscaleSurface);
+SDL_FRect image_display_rect(bool showOriginalResolution, int nativeWidth, int nativeHeight);
+void apply_main_window_size(SDL_Window *window, bool showOriginalResolution,
+  int nativeWidth, int nativeHeight);
 
 //------------------------------------------------------------------------------
 // Botao desenhado com primitivas da SDL, com 3 estados visuais.
@@ -143,8 +146,20 @@ int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
     return EXIT_FAILURE;
   }
 
-  SDL_FRect imageRect = { .x = 0.0f, .y = 0.0f };
-  SDL_GetTextureSize(imageTexture, &imageRect.w, &imageRect.h);
+  int imageNativeWidth = 0;
+  int imageNativeHeight = 0;
+  {
+    float nativeW = 0.0f;
+    float nativeH = 0.0f;
+    SDL_GetTextureSize(imageTexture, &nativeW, &nativeH);
+    imageNativeWidth = (int)nativeW;
+    imageNativeHeight = (int)nativeH;
+  }
+
+  // A janela principal comeca em 1024x768 (item 3), entao o modo de
+  // resolucao inicial e o "fixo" (nao o original da imagem).
+  bool isShowingOriginalResolution = false;
+  SDL_FRect imageRect = image_display_rect(isShowingOriginalResolution, imageNativeWidth, imageNativeHeight);
 
   // Estado da equalizacao: a surface e a analise originais (recebidas pelo
   // gui_run) ficam guardadas; a versao equalizada e calculada sob demanda,
@@ -162,6 +177,13 @@ int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
   {
     .rect = { .x = 80.0f, .y = 480.0f, .w = 240.0f, .h = 44.0f },
     .label = "Equalizar",
+    .state = BUTTON_STATE_NEUTRAL,
+  };
+
+  Button resolutionButton =
+  {
+    .rect = { .x = 80.0f, .y = 536.0f, .w = 240.0f, .h = 44.0f },
+    .label = "Resolucao original",
     .state = BUTTON_STATE_NEUTRAL,
   };
 
@@ -186,26 +208,42 @@ int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
           break;
 
         case SDL_EVENT_MOUSE_MOTION:
-          if (event.motion.windowID == secondaryWindowID &&
-            equalizeButton.state != BUTTON_STATE_PRESSED)
+          if (event.motion.windowID == secondaryWindowID)
           {
-            equalizeButton.state = point_in_rect(event.motion.x, event.motion.y, equalizeButton.rect)
-              ? BUTTON_STATE_HOVER : BUTTON_STATE_NEUTRAL;
+            if (equalizeButton.state != BUTTON_STATE_PRESSED)
+            {
+              equalizeButton.state = point_in_rect(event.motion.x, event.motion.y, equalizeButton.rect)
+                ? BUTTON_STATE_HOVER : BUTTON_STATE_NEUTRAL;
+            }
+            if (resolutionButton.state != BUTTON_STATE_PRESSED)
+            {
+              resolutionButton.state = point_in_rect(event.motion.x, event.motion.y, resolutionButton.rect)
+                ? BUTTON_STATE_HOVER : BUTTON_STATE_NEUTRAL;
+            }
           }
           break;
 
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
-          if (event.button.button == SDL_BUTTON_LEFT &&
-            event.button.windowID == secondaryWindowID &&
-            point_in_rect(event.button.x, event.button.y, equalizeButton.rect))
+          if (event.button.button == SDL_BUTTON_LEFT && event.button.windowID == secondaryWindowID)
           {
-            equalizeButton.state = BUTTON_STATE_PRESSED;
+            if (point_in_rect(event.button.x, event.button.y, equalizeButton.rect))
+            {
+              equalizeButton.state = BUTTON_STATE_PRESSED;
+            }
+            else if (point_in_rect(event.button.x, event.button.y, resolutionButton.rect))
+            {
+              resolutionButton.state = BUTTON_STATE_PRESSED;
+            }
           }
           break;
 
         case SDL_EVENT_MOUSE_BUTTON_UP:
-          if (event.button.button == SDL_BUTTON_LEFT &&
-            equalizeButton.state == BUTTON_STATE_PRESSED)
+          if (event.button.button != SDL_BUTTON_LEFT)
+          {
+            break;
+          }
+
+          if (equalizeButton.state == BUTTON_STATE_PRESSED)
           {
             const bool releasedInsideButton =
               event.button.windowID == secondaryWindowID &&
@@ -244,11 +282,37 @@ int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
               }
               else
               {
-                SDL_GetTextureSize(imageTexture, &imageRect.w, &imageRect.h);
+                // O tamanho da textura nao muda com a equalizacao; mantemos
+                // o modo de resolucao (original ou 1024x768) que ja estava
+                // ativo, em vez de resetar o tamanho de desenho.
+                imageRect = image_display_rect(isShowingOriginalResolution,
+                  imageNativeWidth, imageNativeHeight);
               }
             }
 
             equalizeButton.state = releasedInsideButton
+              ? BUTTON_STATE_HOVER : BUTTON_STATE_NEUTRAL;
+          }
+
+          if (resolutionButton.state == BUTTON_STATE_PRESSED)
+          {
+            const bool releasedInsideButton =
+              event.button.windowID == secondaryWindowID &&
+              point_in_rect(event.button.x, event.button.y, resolutionButton.rect);
+
+            if (releasedInsideButton)
+            {
+              isShowingOriginalResolution = !isShowingOriginalResolution;
+
+              apply_main_window_size(window, isShowingOriginalResolution,
+                imageNativeWidth, imageNativeHeight);
+              imageRect = image_display_rect(isShowingOriginalResolution,
+                imageNativeWidth, imageNativeHeight);
+
+              resolutionButton.label = isShowingOriginalResolution ? "1024x768" : "Resolucao original";
+            }
+
+            resolutionButton.state = releasedInsideButton
               ? BUTTON_STATE_HOVER : BUTTON_STATE_NEUTRAL;
           }
           break;
@@ -267,6 +331,7 @@ int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
     SDL_RenderClear(secondaryRenderer);
     render_histogram(secondaryRenderer, &activeAnalysis);
     draw_button(secondaryRenderer, &equalizeButton);
+    draw_button(secondaryRenderer, &resolutionButton);
     SDL_RenderPresent(secondaryRenderer);
   }
 
