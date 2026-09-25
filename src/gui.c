@@ -212,6 +212,7 @@ int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
 
   SDL_Event event;
   bool isRunning = true;
+  bool saveRequested = false;
   while (isRunning)
   {
     while (SDL_PollEvent(&event))
@@ -234,7 +235,9 @@ int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
           // tecla ficar pressionada.
           if (event.key.key == SDLK_S && !event.key.repeat)
           {
-            save_current_image(renderer);
+            // So marca o pedido: a captura precisa acontecer depois de o
+            // quadro atual ser desenhado (ver abaixo).
+            saveRequested = true;
           }
           break;
 
@@ -356,6 +359,16 @@ int gui_run(SDL_Surface *grayscaleSurface, const HistogramAnalysis *histogram)
     {
       SDL_RenderTexture(renderer, imageTexture, NULL, &imageRect);
     }
+
+    // O conteudo do backbuffer so e valido ANTES do SDL_RenderPresent; depois
+    // dele fica indefinido. Por isso a captura acontece aqui, com o quadro
+    // atual ja desenhado.
+    if (saveRequested)
+    {
+      save_current_image(renderer);
+      saveRequested = false;
+    }
+
     SDL_RenderPresent(renderer);
 
     SDL_SetRenderDrawColor(secondaryRenderer, 24, 24, 28, 255);
