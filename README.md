@@ -54,7 +54,7 @@ A imagem em escala de cinza resultante é usada como base para todas as operaç�
 │       └── morango.png
 │
 ├── docs/
-│   └── Projeto 1_ Etapa 2 - Análise final e implementação.docx
+│   └── Projeto 1_ Etapa 2 - Análise final e implementação.pdf
 │
 └── src/
     ├── main.c
@@ -89,25 +89,28 @@ A imagem em escala de cinza resultante é usada como base para todas as operaç�
 
 ## Contribuição dos integrantes
 
-| Parte inicial do desenvolvimento foi realizado pelo grupo em conjunto em chamada;
+Parte inicial do desenvolvimento foi realizado pelo grupo em conjunto em chamada;
 
-| Bruna Gonçalves Corte David |Testes, elaboração do relatório final e implementação do salvamento de imagem (Item 7)
-| Henrique Brainer Costa | Configuração do ambiente, modularização do código, implementação e teste das funcionalidades principais (carregamento de imagens, conversão em escala de cinza, GUI, equalizador e exibição da imagem), ajustes no Makefile e documentação inicial do README
-| João Pedro Queiroz de Andrade|Implementação da funcionalidade de exibição e cálculo de histograma (Parte 4)
-| Júlia Andrade|Revisão geral, testes, e elaboração do relatório
+| Integrante | Contribuição |
+|---|---|
+| Bruna Gonçalves Corte David | Testes, elaboração do relatório final e implementação do salvamento de imagem (Item 7) |
+| Henrique Brainer Costa | Configuração do ambiente, modularização do código, implementação e teste das funcionalidades principais (carregamento de imagens, conversão em escala de cinza, GUI, equalizador e exibição da imagem), ajustes no Makefile e documentação inicial do README |
+| João Pedro Queiroz de Andrade | Implementação da funcionalidade de exibição e cálculo de histograma (Parte 4) |
+| Júlia Andrade | Revisão geral, testes, e elaboração do relatório |
 
 
 ## Bibliotecas e versões
 
 | Biblioteca | Versão | Download |
 |---|---:|---|
-| Linguagem C | C23 | Padrão utilizado no desenvolvimento |
+| Linguagem C | C99 | Padrão utilizado no desenvolvimento |
 | GCC | 16.1.0 | Compilador utilizado |
 | SDL3 | 3.4.0 | [github.com/libsdl-org/SDL/releases](https://github.com/libsdl-org/SDL/releases/tag/release-3.4.0) |
 | SDL3_image | 3.4.0 | [github.com/libsdl-org/SDL_image/releases](https://github.com/libsdl-org/SDL_image/releases/tag/release-3.4.0) |
 | SDL3_ttf | 3.2.2 | [github.com/libsdl-org/SDL_ttf/releases](https://github.com/libsdl-org/SDL_ttf/releases/tag/release-3.2.2) |
 
-O projeto foi desenvolvido, compilado e testado nos sistemas operacionais Windows 10 e Windows 11
+O projeto foi desenvolvido, compilado e testado nos sistemas operacionais Windows 10 e Windows 11.
+
 A SDL3 é utilizada para janelas, renderização, superfícies, texturas e eventos. A SDL3_image é utilizada para carregar imagens. A SDL3_ttf é utilizada para carregar a fonte e exibir textos na interface.
 
 ## Fonte utilizada
