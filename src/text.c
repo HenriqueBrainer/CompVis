@@ -46,7 +46,22 @@ bool text_init(void)
     return false;
   }
 
-  font = TTF_OpenFont(FONT_PATH, FONT_POINT_SIZE);
+  // Monta o caminho a partir do diretorio do executavel, para a fonte ser
+  // encontrada mesmo quando o programa roda a partir de outro diretorio de
+  // trabalho. O caminho relativo continua como fallback.
+  const char *basePath = SDL_GetBasePath();
+  if (basePath != NULL)
+  {
+    char absolutePath[1024];
+    SDL_snprintf(absolutePath, sizeof(absolutePath), "%s%s", basePath, FONT_PATH);
+    font = TTF_OpenFont(absolutePath, FONT_POINT_SIZE);
+  }
+
+  if (font == NULL)
+  {
+    font = TTF_OpenFont(FONT_PATH, FONT_POINT_SIZE);
+  }
+
   if (font == NULL)
   {
     fprintf(stderr, "Erro ao carregar a fonte '%s': %s\n", FONT_PATH, SDL_GetError());
