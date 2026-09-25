@@ -1,8 +1,11 @@
+
 # CompVis
 
 Projeto 1 — Processamento de Imagens da disciplina de **Computação Visual** da Faculdade de Computação e Informática da Universidade Presbiteriana Mackenzie.
 
 O projeto consiste no desenvolvimento de um software em linguagem C para carregamento, processamento e análise de imagens utilizando SDL3, SDL3_image e SDL3_ttf. A aplicação recebe o caminho de uma imagem pela linha de comando, converte imagens coloridas para escala de cinza, calcula e exibe o histograma e disponibiliza operações de processamento por meio de uma interface com duas janelas.
+
+
 
 ## Objetivos e funcionamento
 
@@ -84,15 +87,27 @@ A imagem em escala de cinza resultante é usada como base para todas as operaç�
 | `Makefile` | Compila automaticamente todos os arquivos `.c` da pasta `src` e vincula as bibliotecas SDL. |
 | `Makefile.local` | Informa os caminhos das bibliotecas instaladas localmente em cada máquina. |
 
+## Contribuição dos integrantes
+
+| Parte inicial do desenvolvimento foi realizado pelo grupo em conjunto em chamada;
+
+| Bruna Gonçalves Corte David |Testes, elaboração do relatório final e implementação do salvamento de imagem (Item 7)
+| Henrique Brainer Costa | Configuração do ambiente, modularização do código, implementação e teste das funcionalidades principais (carregamento de imagens, conversão em escala de cinza, GUI, equalizador e exibição da imagem), ajustes no Makefile e documentação inicial do README
+| João Pedro Queiroz de Andrade|Implementação da funcionalidade de exibição e cálculo de histograma (Parte 4)
+| Júlia Andrade|Revisão geral, testes, e elaboração do relatório
+
+
 ## Bibliotecas e versões
 
 | Biblioteca | Versão | Download |
 |---|---:|---|
+| Linguagem C | C23 | Padrão utilizado no desenvolvimento |
+| GCC | 16.1.0 | Compilador utilizado |
 | SDL3 | 3.4.0 | [github.com/libsdl-org/SDL/releases](https://github.com/libsdl-org/SDL/releases/tag/release-3.4.0) |
 | SDL3_image | 3.4.0 | [github.com/libsdl-org/SDL_image/releases](https://github.com/libsdl-org/SDL_image/releases/tag/release-3.4.0) |
 | SDL3_ttf | 3.2.2 | [github.com/libsdl-org/SDL_ttf/releases](https://github.com/libsdl-org/SDL_ttf/releases/tag/release-3.2.2) |
-| GCC | C99 ou mais recente | — |
 
+O projeto foi desenvolvido, compilado e testado nos sistemas operacionais Windows 10 e Windows 11
 A SDL3 é utilizada para janelas, renderização, superfícies, texturas e eventos. A SDL3_image é utilizada para carregar imagens. A SDL3_ttf é utilizada para carregar a fonte e exibir textos na interface.
 
 ## Fonte utilizada
@@ -238,9 +253,7 @@ A versão atual do projeto contempla as seguintes funcionalidades:
 
 O relatório da análise final e implementação está disponível em:
 
-```text
-docs/Projeto 1_ Etapa 2 - Análise final e implementação.docx
-```
+[Relatório da Etapa 2](<docs/Projeto 1_ Etapa 2 - Análise final e implementação.pdf>)
 
 ## Referências
 
