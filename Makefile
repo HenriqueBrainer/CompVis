@@ -6,7 +6,7 @@ EXE    := $(TARGET).exe
 SRC    := $(wildcard src/*.c)
 OBJ    := $(SRC:.c=.o)
 CC     := gcc
-CFLAGS = -Wall -Wextra -std=c99 -g -DSDL_MAIN_HANDLED -I...
+CFLAGS = -Wall -Wextra -std=c99 -g -DSDL_MAIN_HANDLED
 
 -include Makefile.local
 
