@@ -103,7 +103,7 @@ Parte inicial do desenvolvimento foi realizado pelo grupo em conjunto em chamada
 
 | Biblioteca | Versão | Download |
 |---|---:|---|
-| Linguagem C | C99 | Padrão utilizado no desenvolvimento |
+| Linguagem C | C23 | Padrão utilizado no desenvolvimento |
 | GCC | 16.1.0 | Compilador utilizado |
 | SDL3 | 3.4.0 | [github.com/libsdl-org/SDL/releases](https://github.com/libsdl-org/SDL/releases/tag/release-3.4.0) |
 | SDL3_image | 3.4.0 | [github.com/libsdl-org/SDL_image/releases](https://github.com/libsdl-org/SDL_image/releases/tag/release-3.4.0) |
